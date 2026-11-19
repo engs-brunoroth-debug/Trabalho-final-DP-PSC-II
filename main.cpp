@@ -111,6 +111,32 @@ void removerLivro(Livro*& inicio, int codigo) {
 
     cout << "\nLivro removido com sucesso!\n";
 }
+/*
+ * Funcao: emprestarLivro
+ * Objetivo: Alterar a disponibilidade de um livro para emprestado.
+ * Parametros: Ponteiro para o inicio da lista e codigo do livro.
+ * Retorno: Nenhum.
+ */
+void emprestarLivro(Livro* inicio, int codigo) {
+    Livro* atual = inicio;
+
+    while (atual != nullptr) {
+        if (atual->codigo == codigo) {
+            if (!atual->disponivel) {
+                cout << "\nEste livro ja esta emprestado.\n";
+                return;
+            }
+
+            atual->disponivel = false;
+            cout << "\nLivro emprestado com sucesso!\n";
+            return;
+        }
+
+        atual = atual->proximo;
+    }
+
+    cout << "\nLivro nao encontrado.\n";
+}
 
 int main() {
     Livro* inicio = nullptr;
@@ -118,13 +144,15 @@ int main() {
     cout << "===== SISTEMA DE BIBLIOTECA =====" << endl;
 
     cadastrarLivro(inicio);
+
     listarLivros(inicio);
 
     int codigo;
-    cout << "\nDigite o codigo do livro que deseja remover: ";
+    cout << "\nDigite o codigo do livro que deseja emprestar: ";
     cin >> codigo;
 
-    removerLivro(inicio, codigo);
+    emprestarLivro(inicio, codigo);
+
     listarLivros(inicio);
 
     return 0;
