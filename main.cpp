@@ -15,6 +15,16 @@ struct Livro {
     Livro* proximo;
     
 };
+
+/*
+ * Estrutura: Reserva
+ * Objetivo: Armazenar uma reserva e apontar para a proxima.
+ */
+struct Reserva {
+    int codigoLivro;
+    Reserva* proximo;
+};
+
 /*
  * Funcao: cadastrarLivro
  * Objetivo: Cadastrar um livro e adiciona-lo ao final da lista.
@@ -165,9 +175,49 @@ void devolverLivro(Livro* inicio, int codigo) {
     cout << "\nLivro nao encontrado.\n";
 }
 
+/*
+ * Funcao: reservarLivro
+ * Objetivo: Adicionar uma reserva ao final da fila.
+ * Parametros: Lista de livros, inicio e fim da fila e codigo do livro.
+ * Retorno: Nenhum.
+ */
+void reservarLivro(Livro* livros, Reserva*& inicioFila,
+                   Reserva*& fimFila, int codigoLivro) {
+    Livro* atual = livros;
+
+    while (atual != nullptr && atual->codigo != codigoLivro) {
+        atual = atual->proximo;
+    }
+
+    if (atual == nullptr) {
+        cout << "\nLivro nao encontrado.\n";
+        return;
+    }
+
+    if (atual->disponivel) {
+        cout << "\nLivro disponivel. Nao precisa de reserva.\n";
+        return;
+    }
+
+    Reserva* nova = new Reserva;
+    nova->codigoLivro = codigoLivro;
+    nova->proximo = nullptr;
+
+    if (inicioFila == nullptr) {
+        inicioFila = nova;
+        fimFila = nova;
+    } else {
+        fimFila->proximo = nova;
+        fimFila = nova;
+    }
+
+    cout << "\nReserva realizada com sucesso!\n";
+}
+
 int main() {
     Livro* inicio = nullptr;
-
+    Reserva* inicioFila = nullptr;
+    Reserva* fimFila = nullptr;
     cout << "===== SISTEMA DE BIBLIOTECA =====" << endl;
 
     cadastrarLivro(inicio);
@@ -179,6 +229,12 @@ int main() {
     cin >> codigo;
 
     emprestarLivro(inicio, codigo);
+    
+    cout << "\nDigite o codigo do livro que deseja reservar: ";
+cin >> codigo;
+
+reservarLivro(inicio, inicioFila, fimFila, codigo);
+
     listarLivros(inicio);
 
     cout << "\nDigite o codigo do livro que deseja devolver: ";
