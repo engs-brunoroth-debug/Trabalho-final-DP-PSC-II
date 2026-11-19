@@ -37,6 +37,17 @@ struct Operacao {
 
 
 /*
+ * Estrutura: NoArvore
+ * Objetivo: Armazenar o codigo do livro e os filhos da arvore.
+ */
+struct NoArvore {
+    int codigo;
+    NoArvore* esquerda;
+    NoArvore* direita;
+};
+
+
+/*
  * Funcao: registrarOperacao
  * Objetivo: Inserir uma operacao no topo da pilha.
  * Parametros: Referencia para a pilha, codigo e tipo da operacao.
@@ -70,6 +81,71 @@ void mostrarHistorico(const Operacao* topo) {
         cout << " | Operacao: " << topo->tipo << endl;
         topo = topo->proximo;
     }
+}
+
+
+/*
+ * Funcao: inserirArvore
+ * Objetivo: Inserir um codigo na arvore binaria de busca.
+ * Parametros: Raiz da arvore e codigo do livro.
+ * Retorno: Ponteiro para a raiz atualizada.
+ */
+NoArvore* inserirArvore(NoArvore* raiz, int codigo) {
+    if (raiz == nullptr) {
+        NoArvore* novo = new NoArvore;
+        novo->codigo = codigo;
+        novo->esquerda = nullptr;
+        novo->direita = nullptr;
+        return novo;
+    }
+
+    if (codigo < raiz->codigo) {
+        raiz->esquerda = inserirArvore(raiz->esquerda, codigo);
+    } else if (codigo > raiz->codigo) {
+        raiz->direita = inserirArvore(raiz->direita, codigo);
+    }
+
+    return raiz;
+}
+
+
+/*
+ * Funcao: buscarArvore
+ * Objetivo: Procurar um codigo na arvore recursivamente.
+ * Parametros: Raiz da arvore e codigo procurado.
+ * Retorno: true se encontrar; false caso contrario.
+ */
+bool buscarArvore(const NoArvore* raiz, int codigo) {
+    if (raiz == nullptr) {
+        return false;
+    }
+
+    if (raiz->codigo == codigo) {
+        return true;
+    }
+
+    if (codigo < raiz->codigo) {
+        return buscarArvore(raiz->esquerda, codigo);
+    }
+
+    return buscarArvore(raiz->direita, codigo);
+}
+
+
+/*
+ * Funcao: percorrerEmOrdem
+ * Objetivo: Exibir os codigos em ordem crescente.
+ * Parametro: Ponteiro constante para a raiz da arvore.
+ * Retorno: Nenhum.
+ */
+void percorrerEmOrdem(const NoArvore* raiz) {
+    if (raiz == nullptr) {
+        return;
+    }
+
+    percorrerEmOrdem(raiz->esquerda);
+    cout << raiz->codigo << " ";
+    percorrerEmOrdem(raiz->direita);
 }
 
 
@@ -318,9 +394,11 @@ int main() {
     Reserva* inicioFila = nullptr;
     Reserva* fimFila = nullptr;
     Operacao* topoHistorico = nullptr;
+    NoArvore* raiz = nullptr;
     cout << "===== SISTEMA DE BIBLIOTECA =====" << endl;
 
     cadastrarLivro(inicio);
+    raiz = inserirArvore(raiz, inicio->codigo);
     listarLivros(inicio);
 
     int codigo;
@@ -345,6 +423,19 @@ mostrarFilaReservas(inicioFila);
     mostrarFilaReservas(inicioFila);
     listarLivros(inicio);
     mostrarHistorico(topoHistorico);
+    cout << "\n===== CODIGOS EM ORDEM =====\n";
+percorrerEmOrdem(raiz);
+
+int codigoBusca;
+
+cout << "\n\nDigite o codigo que deseja buscar na arvore: ";
+cin >> codigoBusca;
+
+if (buscarArvore(raiz, codigoBusca)) {
+    cout << "\nLivro encontrado na arvore!\n";
+} else {
+    cout << "\nLivro nao encontrado na arvore.\n";
+}
 
     return 0;
 }
