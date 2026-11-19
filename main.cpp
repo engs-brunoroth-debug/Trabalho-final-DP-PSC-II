@@ -138,21 +138,53 @@ void emprestarLivro(Livro* inicio, int codigo) {
     cout << "\nLivro nao encontrado.\n";
 }
 
+/*
+ * Funcao: devolverLivro
+ * Objetivo: Alterar a disponibilidade de um livro para disponivel.
+ * Parametros: Ponteiro para o inicio da lista e codigo do livro.
+ * Retorno: Nenhum.
+ */
+void devolverLivro(Livro* inicio, int codigo) {
+    Livro* atual = inicio;
+
+    while (atual != nullptr) {
+        if (atual->codigo == codigo) {
+            if (atual->disponivel) {
+                cout << "\nEste livro ja esta disponivel.\n";
+                return;
+            }
+
+            atual->disponivel = true;
+            cout << "\nLivro devolvido com sucesso!\n";
+            return;
+        }
+
+        atual = atual->proximo;
+    }
+
+    cout << "\nLivro nao encontrado.\n";
+}
+
 int main() {
     Livro* inicio = nullptr;
 
     cout << "===== SISTEMA DE BIBLIOTECA =====" << endl;
 
     cadastrarLivro(inicio);
-
     listarLivros(inicio);
 
     int codigo;
+
     cout << "\nDigite o codigo do livro que deseja emprestar: ";
     cin >> codigo;
 
     emprestarLivro(inicio, codigo);
+    listarLivros(inicio);
 
+    cout << "\nDigite o codigo do livro que deseja devolver: ";
+    cin >> codigo;
+
+    devolverLivro(inicio, codigo);
     listarLivros(inicio);
 
     return 0;
