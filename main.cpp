@@ -26,11 +26,60 @@ struct Reserva {
 };
 
 /*
+ * Estrutura: Operacao
+ * Objetivo: Armazenar uma operacao no historico da biblioteca.
+ */
+struct Operacao {
+    int codigoLivro;
+    string tipo;
+    Operacao* proximo;
+};
+
+
+/*
+ * Funcao: registrarOperacao
+ * Objetivo: Inserir uma operacao no topo da pilha.
+ * Parametros: Referencia para a pilha, codigo e tipo da operacao.
+ * Retorno: Nenhum.
+ */
+void registrarOperacao(Operacao*& topo, int codigo, string tipo) {
+    Operacao* nova = new Operacao;
+    nova->codigoLivro = codigo;
+    nova->tipo = tipo;
+    nova->proximo = topo;
+    topo = nova;
+}
+
+
+/*
+ * Funcao: mostrarHistorico
+ * Objetivo: Exibir as operacoes do topo para a base da pilha.
+ * Parametro: Ponteiro para o topo da pilha.
+ * Retorno: Nenhum.
+ */
+void mostrarHistorico(const Operacao* topo) {
+    if (topo == nullptr) {
+        cout << "\nHistorico vazio.\n";
+        return;
+    }
+
+    cout << "\n===== HISTORICO DE OPERACOES =====\n";
+
+    while (topo != nullptr) {
+        cout << "Livro: " << topo->codigoLivro;
+        cout << " | Operacao: " << topo->tipo << endl;
+        topo = topo->proximo;
+    }
+}
+
+
+/*
  * Funcao: cadastrarLivro
  * Objetivo: Cadastrar um livro e adiciona-lo ao final da lista.
  * Parametro: Referencia para o inicio da lista encadeada.
  * Retorno: Nenhum.
  */
+
 void cadastrarLivro(Livro*& inicio) {
     Livro* novo = new Livro;
 
@@ -127,7 +176,7 @@ void removerLivro(Livro*& inicio, int codigo) {
  * Parametros: Ponteiro para o inicio da lista e codigo do livro.
  * Retorno: Nenhum.
  */
-void emprestarLivro(Livro* inicio, int codigo) {
+void emprestarLivro(Livro* inicio, int codigo, Operacao*& topo) {
     Livro* atual = inicio;
 
     while (atual != nullptr) {
@@ -138,8 +187,9 @@ void emprestarLivro(Livro* inicio, int codigo) {
             }
 
             atual->disponivel = false;
-            cout << "\nLivro emprestado com sucesso!\n";
-            return;
+registrarOperacao(topo, codigo, "Emprestimo");
+cout << "\nLivro emprestado com sucesso!\n";
+return;
         }
 
         atual = atual->proximo;
@@ -154,7 +204,7 @@ void emprestarLivro(Livro* inicio, int codigo) {
  * Parametros: Ponteiro para o inicio da lista e codigo do livro.
  * Retorno: Nenhum.
  */
-void devolverLivro(Livro* inicio, int codigo) {
+void devolverLivro(Livro* inicio, int codigo, Operacao*& topo) {
     Livro* atual = inicio;
 
     while (atual != nullptr) {
@@ -165,8 +215,9 @@ void devolverLivro(Livro* inicio, int codigo) {
             }
 
             atual->disponivel = true;
-            cout << "\nLivro devolvido com sucesso!\n";
-            return;
+registrarOperacao(topo, codigo, "Devolucao");
+cout << "\nLivro devolvido com sucesso!\n";
+return;
         }
 
         atual = atual->proximo;
@@ -266,6 +317,7 @@ int main() {
     Livro* inicio = nullptr;
     Reserva* inicioFila = nullptr;
     Reserva* fimFila = nullptr;
+    Operacao* topoHistorico = nullptr;
     cout << "===== SISTEMA DE BIBLIOTECA =====" << endl;
 
     cadastrarLivro(inicio);
@@ -276,8 +328,7 @@ int main() {
     cout << "\nDigite o codigo do livro que deseja emprestar: ";
     cin >> codigo;
 
-    emprestarLivro(inicio, codigo);
-
+ emprestarLivro(inicio, codigo, topoHistorico);
     cout << "\nDigite o codigo do livro que deseja reservar: ";
 cin >> codigo;
 
@@ -289,10 +340,11 @@ mostrarFilaReservas(inicioFila);
     cout << "\nDigite o codigo do livro que deseja devolver: ";
     cin >> codigo;
 
-    devolverLivro(inicio, codigo);
+  devolverLivro(inicio, codigo, topoHistorico);
     atenderProximaReserva(inicioFila, fimFila);
     mostrarFilaReservas(inicioFila);
     listarLivros(inicio);
+    mostrarHistorico(topoHistorico);
 
     return 0;
 }
