@@ -214,6 +214,28 @@ void reservarLivro(Livro* livros, Reserva*& inicioFila,
     cout << "\nReserva realizada com sucesso!\n";
 }
 
+/*
+ * Funcao: mostrarFilaReservas
+ * Objetivo: Exibir todas as reservas na ordem de chegada.
+ * Parametro: Ponteiro para o inicio da fila.
+ * Retorno: Nenhum.
+ */
+void mostrarFilaReservas(const Reserva* inicioFila) {
+    if (inicioFila == nullptr) {
+        cout << "\nNao existem reservas na fila.\n";
+        return;
+    }
+
+    const Reserva* atual = inicioFila;
+
+    cout << "\n===== FILA DE RESERVAS =====\n";
+
+    while (atual != nullptr) {
+        cout << "Codigo do livro: " << atual->codigoLivro << endl;
+        atual = atual->proximo;
+    }
+}
+
 int main() {
     Livro* inicio = nullptr;
     Reserva* inicioFila = nullptr;
@@ -229,11 +251,12 @@ int main() {
     cin >> codigo;
 
     emprestarLivro(inicio, codigo);
-    
+
     cout << "\nDigite o codigo do livro que deseja reservar: ";
 cin >> codigo;
 
 reservarLivro(inicio, inicioFila, fimFila, codigo);
+mostrarFilaReservas(inicioFila);
 
     listarLivros(inicio);
 
