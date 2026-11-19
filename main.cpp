@@ -236,6 +236,32 @@ void mostrarFilaReservas(const Reserva* inicioFila) {
     }
 }
 
+/*
+ * Funcao: atenderProximaReserva
+ * Objetivo: Remover e atender a primeira reserva da fila.
+ * Parametros: Referencias para o inicio e o fim da fila.
+ * Retorno: Nenhum.
+ */
+void atenderProximaReserva(Reserva*& inicioFila, Reserva*& fimFila) {
+    if (inicioFila == nullptr) {
+        cout << "\nNao existem reservas para atender.\n";
+        return;
+    }
+
+    Reserva* atendida = inicioFila;
+
+    cout << "\nReserva atendida para o livro: "
+         << atendida->codigoLivro << endl;
+
+    inicioFila = inicioFila->proximo;
+
+    if (inicioFila == nullptr) {
+        fimFila = nullptr;
+    }
+
+    delete atendida;
+}
+
 int main() {
     Livro* inicio = nullptr;
     Reserva* inicioFila = nullptr;
@@ -264,6 +290,8 @@ mostrarFilaReservas(inicioFila);
     cin >> codigo;
 
     devolverLivro(inicio, codigo);
+    atenderProximaReserva(inicioFila, fimFila);
+    mostrarFilaReservas(inicioFila);
     listarLivros(inicio);
 
     return 0;
