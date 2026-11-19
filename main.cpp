@@ -50,11 +50,36 @@ void cadastrarLivro(Livro*& inicio) {
     cout << "\nLivro cadastrado com sucesso!\n";
 }
 /*
- * Programa: Sistema de Biblioteca
- * Objetivo: Gerenciar livros, empréstimos e reservas.
- * Autor: Bruno Roth
- * Linguagem: C++
+ * Funcao: listarLivros
+ * Objetivo: Exibir todos os livros cadastrados na lista.
+ * Parametro: Ponteiro para o inicio da lista encadeada.
+ * Retorno: Nenhum.
  */
+void listarLivros(const Livro* inicio) {
+    if (inicio == nullptr) {
+        cout << "\nNenhum livro cadastrado.\n";
+        return;
+    }
+
+    const Livro* atual = inicio;
+
+    cout << "\n===== LIVROS CADASTRADOS =====\n";
+
+    while (atual != nullptr) {
+        cout << "\nCodigo: " << atual->codigo;
+        cout << "\nTitulo: " << atual->titulo;
+        cout << "\nAutor: " << atual->autor;
+        cout << "\nDisponibilidade: ";
+
+        if (atual->disponivel) {
+            cout << "Disponivel\n";
+        } else {
+            cout << "Emprestado\n";
+        }
+
+        atual = atual->proximo;
+    }
+}
 
 int main() {
     Livro* inicio = nullptr;
@@ -62,6 +87,7 @@ int main() {
     cout << "===== SISTEMA DE BIBLIOTECA =====" << endl;
 
     cadastrarLivro(inicio);
+    listarLivros(inicio);
 
     return 0;
 }
