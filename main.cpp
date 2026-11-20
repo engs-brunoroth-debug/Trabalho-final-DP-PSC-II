@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <limits>
+#include <algorithm>
+#include <vector>
 
 using namespace std;
 /*
@@ -147,6 +149,115 @@ void percorrerEmOrdem(const NoArvore* raiz) {
     cout << raiz->codigo << " ";
     percorrerEmOrdem(raiz->direita);
 }
+/*
+ * Complexidade do Bubble Sort:
+ * Melhor caso: O(n), quando a lista ja esta ordenada.
+ * Pior caso: O(n²), quando a lista esta em ordem inversa.
+ * Caso medio: O(n²).
+ * O algoritmo compara elementos vizinhos e troca suas
+ * posicoes quando estao fora de ordem.
+ */
+
+/*
+ * Funcao: ordenarLivros
+ * Objetivo: Ordenar os livros pelo codigo usando Bubble Sort.
+ * Parametro: Ponteiro para o inicio da lista.
+ * Retorno: Nenhum.
+ */
+void ordenarLivros(Livro* inicio) {
+    if (inicio == nullptr) {
+        return;
+    }
+
+    bool trocou;
+
+    do {
+        trocou = false;
+        Livro* atual = inicio;
+
+        while (atual->proximo != nullptr) {
+            if (atual->codigo > atual->proximo->codigo) {
+                swap(atual->codigo, atual->proximo->codigo);
+                swap(atual->titulo, atual->proximo->titulo);
+                swap(atual->autor, atual->proximo->autor);
+                swap(atual->disponivel, atual->proximo->disponivel);
+                trocou = true;
+            }
+
+            atual = atual->proximo;
+        }
+    } while (trocou);
+}
+
+
+/*
+ * Funcao: buscaSequencial
+ * Objetivo: Procurar um livro percorrendo a lista.
+ * Retorno: true se encontrar; false caso contrario.
+ */
+bool buscaSequencial(const Livro* inicio, int codigo,
+                     int& comparacoes) {
+    comparacoes = 0;
+
+    while (inicio != nullptr) {
+        comparacoes++;
+
+        if (inicio->codigo == codigo) {
+            return true;
+        }
+
+        inicio = inicio->proximo;
+    }
+
+    return false;
+}
+
+/*
+ * Funcao: buscaBinaria
+ * Objetivo: Procurar um codigo em um vetor ordenado.
+ * Retorno: true se encontrar; false caso contrario.
+ */
+bool buscaBinaria(const vector<int>& codigos, int codigo,
+                  int& comparacoes) {
+    int inicio = 0;
+    int fim = static_cast<int>(codigos.size()) - 1;
+    comparacoes = 0;
+
+    while (inicio <= fim) {
+        int meio = inicio + (fim - inicio) / 2;
+        comparacoes++;
+
+        if (codigos[meio] == codigo) {
+            return true;
+        }
+
+        if (codigos[meio] < codigo) {
+            inicio = meio + 1;
+        } else {
+            fim = meio - 1;
+        }
+    }
+
+    return false;
+}
+
+
+/*
+ * Funcao: codigoExiste
+ * Objetivo: Verificar se um codigo ja esta cadastrado.
+ * Parametros: Lista de livros e codigo procurado.
+ * Retorno: true se existir; false caso contrario.
+ */
+bool codigoExiste(const Livro* inicio, int codigo) {
+    while (inicio != nullptr) {
+        if (inicio->codigo == codigo) {
+            return true;
+        }
+        inicio = inicio->proximo;
+    }
+    return false;
+}
+
 
 
 /*
@@ -155,7 +266,6 @@ void percorrerEmOrdem(const NoArvore* raiz) {
  * Parametro: Referencia para o inicio da lista encadeada.
  * Retorno: Nenhum.
  */
-
 void cadastrarLivro(Livro*& inicio) {
     Livro* novo = new Livro;
 
@@ -163,9 +273,14 @@ void cadastrarLivro(Livro*& inicio) {
     cin >> novo->codigo;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
+    if (codigoExiste(inicio, novo->codigo)) {
+        cout << "\nCodigo ja cadastrado! Tente outro.\n";
+        delete novo;
+        return;
+    }
+
     cout << "Digite o titulo: ";
     getline(cin, novo->titulo);
-
     cout << "Digite o autor: ";
     getline(cin, novo->autor);
 
@@ -176,9 +291,8 @@ void cadastrarLivro(Livro*& inicio) {
         inicio = novo;
     } else {
         Livro* atual = inicio;
-        while (atual->proximo != nullptr) {
+        while (atual->proximo != nullptr)
             atual = atual->proximo;
-        }
         atual->proximo = novo;
     }
 
@@ -280,26 +394,34 @@ return;
  * Parametros: Ponteiro para o inicio da lista e codigo do livro.
  * Retorno: Nenhum.
  */
-void devolverLivro(Livro* inicio, int codigo, Operacao*& topo) {
+
+/*
+ * Funcao: devolverLivro
+ * Objetivo: Alterar a disponibilidade de um livro para disponivel.
+ * Parametros: Ponteiro para a lista, codigo e referencia para o historico.
+ * Retorno: true se devolver; false caso contrario.
+ */
+bool devolverLivro(Livro* inicio, int codigo, Operacao*& topo) {
     Livro* atual = inicio;
 
     while (atual != nullptr) {
         if (atual->codigo == codigo) {
             if (atual->disponivel) {
                 cout << "\nEste livro ja esta disponivel.\n";
-                return;
+                return false;
             }
 
             atual->disponivel = true;
-registrarOperacao(topo, codigo, "Devolucao");
-cout << "\nLivro devolvido com sucesso!\n";
-return;
+            registrarOperacao(topo, codigo, "Devolucao");
+            cout << "\nLivro devolvido com sucesso!\n";
+            return true;
         }
 
         atual = atual->proximo;
     }
 
     cout << "\nLivro nao encontrado.\n";
+    return false;
 }
 
 /*
@@ -363,15 +485,26 @@ void mostrarFilaReservas(const Reserva* inicioFila) {
     }
 }
 
+
 /*
  * Funcao: atenderProximaReserva
- * Objetivo: Remover e atender a primeira reserva da fila.
- * Parametros: Referencias para o inicio e o fim da fila.
+ * Objetivo: Atender a reserva do livro devolvido, se for a primeira.
+ * Parametros: Inicio, fim da fila e codigo do livro devolvido.
  * Retorno: Nenhum.
  */
-void atenderProximaReserva(Reserva*& inicioFila, Reserva*& fimFila) {
+void atenderProximaReserva(
+    Reserva*& inicioFila,
+    Reserva*& fimFila,
+    int codigoDevolvido
+) {
     if (inicioFila == nullptr) {
         cout << "\nNao existem reservas para atender.\n";
+        return;
+    }
+
+    if (inicioFila->codigoLivro != codigoDevolvido) {
+        cout << "\nA primeira reserva e de outro livro. "
+             << "Ela permanece na fila.\n";
         return;
     }
 
@@ -389,53 +522,264 @@ void atenderProximaReserva(Reserva*& inicioFila, Reserva*& fimFila) {
     delete atendida;
 }
 
+/*
+ * Funcao: liberarLivros
+ * Objetivo: Liberar toda a memoria da lista de livros.
+ * Parametro: Referencia para o inicio da lista.
+ * Retorno: Nenhum.
+ */
+void liberarLivros(Livro*& inicio) {
+    while (inicio != nullptr) {
+        Livro* auxiliar = inicio;
+        inicio = inicio->proximo;
+        delete auxiliar;
+    }
+    inicio = nullptr;
+}
+
+/*
+ * Funcao: liberarReservas
+ * Objetivo: Liberar toda a memoria da fila.
+ * Parametros: Inicio e fim da fila.
+ * Retorno: Nenhum.
+ */
+void liberarReservas(Reserva*& inicio, Reserva*& fim) {
+    while (inicio != nullptr) {
+        Reserva* auxiliar = inicio;
+        inicio = inicio->proximo;
+        delete auxiliar;
+    }
+    fim = nullptr;
+}
+
+/*
+ * Funcao: liberarHistorico
+ * Objetivo: Liberar toda a memoria da pilha.
+ * Parametro: Referencia para o topo.
+ * Retorno: Nenhum.
+ */
+void liberarHistorico(Operacao*& topo) {
+    while (topo != nullptr) {
+        Operacao* auxiliar = topo;
+        topo = topo->proximo;
+        delete auxiliar;
+    }
+    topo = nullptr;
+}
+
+/*
+ * Funcao: liberarArvore
+ * Objetivo: Liberar os nos da arvore recursivamente.
+ * Parametro: Referencia para a raiz.
+ * Retorno: Nenhum.
+ */
+void liberarArvore(NoArvore*& raiz) {
+    if (raiz == nullptr) {
+        return;
+    }
+
+    liberarArvore(raiz->esquerda);
+    liberarArvore(raiz->direita);
+
+    delete raiz;
+    raiz = nullptr;
+}
+
+/*
+ * Funcao: cadastrarLivrosEArvore
+ * Objetivo: Cadastrar varios livros e inserir seus codigos na arvore.
+ * Parametros: Referencias para a lista de livros e raiz da arvore.
+ * Retorno: Nenhum.
+ */
+void cadastrarLivrosEArvore(Livro*& inicio, NoArvore*& raiz) {
+    char continuarCadastro;
+
+    do {
+        cadastrarLivro(inicio);
+
+        cout << "\nDeseja cadastrar outro livro? (s/n): ";
+        cin >> continuarCadastro;
+
+    } while (continuarCadastro == 's' || continuarCadastro == 'S');
+
+    Livro* atual = inicio;
+
+    while (atual != nullptr) {
+        raiz = inserirArvore(raiz, atual->codigo);
+        atual = atual->proximo;
+    }
+}
+
+/*
+ * Funcao: executarEmprestimoEReserva
+ * Objetivo: Realizar emprestimo e reserva de livros.
+ * Parametros: Lista de livros, fila de reservas e historico.
+ * Retorno: Nenhum.
+ */
+void executarEmprestimoEReserva(
+    Livro* inicio,
+    Reserva*& inicioFila,
+    Reserva*& fimFila,
+    Operacao*& topoHistorico
+) {
+    int codigo;
+
+    cout << "\nDigite o codigo do livro que deseja emprestar: ";
+    cin >> codigo;
+    emprestarLivro(inicio, codigo, topoHistorico);
+
+    cout << "\nDigite o codigo do livro que deseja reservar: ";
+    cin >> codigo;
+    reservarLivro(inicio, inicioFila, fimFila, codigo);
+
+    mostrarFilaReservas(inicioFila);
+    listarLivros(inicio);
+}
+
+ /*
+ * Funcao: executarDevolucao
+ * Objetivo: Devolver um livro e atender a proxima reserva.
+ * Parametros: Lista de livros, fila de reservas e historico.
+ * Retorno: Nenhum.
+ */
+void executarDevolucao(
+    Livro* inicio,
+    Reserva*& inicioFila,
+    Reserva*& fimFila,
+    Operacao*& topoHistorico
+) {
+    int codigo;
+
+    cout << "\nDigite o codigo do livro que deseja devolver: ";
+    cin >> codigo;
+
+ if (devolverLivro(inicio, codigo, topoHistorico)) {
+    atenderProximaReserva(inicioFila, fimFila, codigo);
+
+}
+    mostrarFilaReservas(inicioFila);
+    listarLivros(inicio);
+    mostrarHistorico(topoHistorico);
+}
+
+/*
+ * Funcao: executarOrdenacao
+ * Objetivo: Ordenar e listar os livros por codigo.
+ * Parametros: Inicio da lista de livros.
+ * Retorno: Nenhum.
+ */
+void executarOrdenacao(Livro* inicio) {
+    cout << "\n===== LIVROS ORDENADOS POR CODIGO =====\n";
+
+    ordenarLivros(inicio);
+    listarLivros(inicio);
+}
+
+/*
+ * Funcao: criarVetorCodigos
+ * Objetivo: Copiar os codigos dos livros para um vetor.
+ * Parametro: Ponteiro para o inicio da lista de livros.
+ * Retorno: Vetor contendo os codigos dos livros.
+ */
+vector<int> criarVetorCodigos(const Livro* inicio) {
+    vector<int> codigos;
+    const Livro* atual = inicio;
+
+    while (atual != nullptr) {
+        codigos.push_back(atual->codigo);
+        atual = atual->proximo;
+    }
+
+    return codigos;
+}
+/*
+ * Funcao: executarBuscas
+ * Objetivo: Comparar as buscas sequencial, binaria e na arvore.
+ * Parametros: Lista de livros e raiz da arvore.
+ * Retorno: Nenhum.
+ */
+void executarBuscas(Livro* inicio, const NoArvore* raiz) {
+   vector<int> codigosOrdenados = criarVetorCodigos(inicio);
+
+    int codigoBusca;
+    cout << "\nDigite o codigo que deseja buscar: ";
+    cin >> codigoBusca;
+
+    int comparacoesSequencial = 0;
+    int comparacoesBinaria = 0;
+
+    bool encontrouSequencial =
+        buscaSequencial(inicio, codigoBusca, comparacoesSequencial);
+
+    bool encontrouBinaria =
+        buscaBinaria(codigosOrdenados, codigoBusca, comparacoesBinaria);
+
+    cout << "\n===== COMPARACAO DAS BUSCAS =====\n";
+    cout << "Busca sequencial: "
+         << (encontrouSequencial ? "Encontrado" : "Nao encontrado")
+         << " | Comparacoes: " << comparacoesSequencial << endl;
+
+    cout << "Busca binaria: "
+         << (encontrouBinaria ? "Encontrado" : "Nao encontrado")
+         << " | Comparacoes: " << comparacoesBinaria << endl;
+
+    if (buscarArvore(raiz, codigoBusca)) {
+        cout << "\nLivro encontrado na arvore!\n";
+    } else {
+        cout << "\nLivro nao encontrado na arvore.\n";
+    }
+}
+
+/*
+ * Funcao: executarPercursoArvore
+ * Objetivo: Exibir os codigos dos livros em ordem crescente.
+ * Parametros: Raiz da arvore binaria.
+ * Retorno: Nenhum.
+ */
+void executarPercursoArvore(const NoArvore* raiz) {
+    cout << "\n===== CODIGOS EM ORDEM =====\n";
+    percorrerEmOrdem(raiz);
+}
+
+/*
+ * Funcao: liberarEstruturas
+ * Objetivo: Liberar toda a memoria alocada pelo sistema.
+ * Parametros: Referencias para as estruturas utilizadas.
+ * Retorno: Nenhum.
+ */
+void liberarEstruturas(
+    Livro*& inicio,
+    Reserva*& inicioFila,
+    Reserva*& fimFila,
+    Operacao*& topoHistorico,
+    NoArvore*& raiz
+) {
+    liberarLivros(inicio);
+    liberarReservas(inicioFila, fimFila);
+    liberarHistorico(topoHistorico);
+    liberarArvore(raiz);
+}
+
 int main() {
     Livro* inicio = nullptr;
     Reserva* inicioFila = nullptr;
     Reserva* fimFila = nullptr;
     Operacao* topoHistorico = nullptr;
     NoArvore* raiz = nullptr;
+
     cout << "===== SISTEMA DE BIBLIOTECA =====" << endl;
 
-    cadastrarLivro(inicio);
-    raiz = inserirArvore(raiz, inicio->codigo);
+    cadastrarLivrosEArvore(inicio, raiz);
     listarLivros(inicio);
 
-    int codigo;
+    executarEmprestimoEReserva(inicio, inicioFila, fimFila, topoHistorico);
+    executarDevolucao(inicio, inicioFila, fimFila, topoHistorico);
 
-    cout << "\nDigite o codigo do livro que deseja emprestar: ";
-    cin >> codigo;
+    executarOrdenacao(inicio);
+    executarPercursoArvore(raiz);
+    executarBuscas(inicio, raiz);
 
- emprestarLivro(inicio, codigo, topoHistorico);
-    cout << "\nDigite o codigo do livro que deseja reservar: ";
-cin >> codigo;
-
-reservarLivro(inicio, inicioFila, fimFila, codigo);
-mostrarFilaReservas(inicioFila);
-
-    listarLivros(inicio);
-
-    cout << "\nDigite o codigo do livro que deseja devolver: ";
-    cin >> codigo;
-
-  devolverLivro(inicio, codigo, topoHistorico);
-    atenderProximaReserva(inicioFila, fimFila);
-    mostrarFilaReservas(inicioFila);
-    listarLivros(inicio);
-    mostrarHistorico(topoHistorico);
-    cout << "\n===== CODIGOS EM ORDEM =====\n";
-percorrerEmOrdem(raiz);
-
-int codigoBusca;
-
-cout << "\n\nDigite o codigo que deseja buscar na arvore: ";
-cin >> codigoBusca;
-
-if (buscarArvore(raiz, codigoBusca)) {
-    cout << "\nLivro encontrado na arvore!\n";
-} else {
-    cout << "\nLivro nao encontrado na arvore.\n";
-}
+    liberarEstruturas(inicio, inicioFila, fimFila, topoHistorico, raiz);
 
     return 0;
 }
