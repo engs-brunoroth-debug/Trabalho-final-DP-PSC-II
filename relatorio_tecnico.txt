@@ -1,0 +1,51 @@
+RELATÓRIO TÉCNICO – SISTEMA DE GERENCIAMENTO DE BIBLIOTECA
+
+1. INTRODUÇÃO
+
+Neste projeto, desenvolvi um sistema de gerenciamento de biblioteca utilizando a linguagem C++. 
+O objetivo foi colocar em prática os conteúdos que aprendemos durante a disciplina, criando um programa que permite 
+cadastrar, listar e remover livros, realizar empréstimos e devoluções, fazer reservas e consultar o histórico de operações.
+
+2. ESTRUTURAS DE DADOS
+
+Durante o desenvolvimento, utilizei diferentes estruturas de dados, cada uma com uma função dentro do sistema.
+
+Utilizei a lista encadeada para armazenar os livros cadastrados, permitindo adicionar, consultar e remover os livros.
+
+Utilizei a fila para organizar as reservas. Dessa forma, a primeira reserva realizada é a primeira a ser atendida.
+
+Também utilizei uma pilha para guardar o histórico das operações, mostrando primeiro a operação mais recente.
+
+Implementei uma Árvore Binária de Busca para organizar os códigos dos livros e realizar pesquisas. Também utilizei 
+um vetor para armazenar os códigos durante a realização da busca binária.
+
+3. ORDENAÇÃO DOS LIVROS
+
+Para organizar os livros pelo código, utilizei o algoritmo Bubble Sort. Ele funciona comparando os elementos e
+ trocando suas posições quando necessário, até que todos estejam na ordem correta.
+
+A complexidade desse algoritmo é O(n²) no caso médio e no pior caso. Quando os elementos já estão ordenados, 
+a complexidade é O(n), pois o algoritmo consegue identificar que não precisa realizar trocas.
+Escolhi esse método por ser mais simples de implementar e por permitir demonstrar o funcionamento de um algoritmo
+ de ordenação.
+4. MÉTODOS DE BUSCA
+No sistema, implementei dois métodos de busca para comparar seus resultados.
+A busca sequencial funciona percorrendo os livros um por um até encontrar o código procurado. 
+Sua complexidade é O(n).
+Já a busca binária funciona de outra maneira. Ela utiliza um vetor ordenado e vai dividindo a pesquisa pela metade 
+até encontrar o código desejado.
+ Sua complexidade é O(log n).
+Para comparar os dois métodos, fiz com que o sistema mostrasse a quantidade de comparações realizadas em cada busca.
+5. GERENCIAMENTO DE MEMÓRIA
+
+Durante o desenvolvimento, utilizei os comandos new e delete para trabalhar com a memória dinâmica. O new foi utili
+zado para criar os elementos das estruturas de dados, enquanto o delete foi utilizado para liberar a memória quando 
+esses elementos não eram mais necessários.
+Também criei funções específicas para liberar a memória utilizada pelas listas, filas, pilhas e pela árvore, evitando
+deixar elementos ocupando memória sem necessidade.
+6. CONCLUSÃO
+Com a realização deste projeto, consegui colocar em prática vários conteúdos estudados durante a disciplina. 
+Ao desenvolver o sistema, tive a oportunidade de trabalhar com listas encadeadas, filas, pilhas, árvores, ponteiros, 
+buscas, ordenação e gerenciamento de memória.
+Foi um trabalho importante para entender melhor como essas estruturas funcionam e como podem ser utilizadas em um 
+programa real. Também consegui desenvolver e testar as funcionalidades do sistema utilizando a linguagem C++.
